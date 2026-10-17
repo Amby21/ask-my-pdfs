@@ -1,0 +1,4 @@
+openai
+pypdf
+azure-identity
+azure-search-documents

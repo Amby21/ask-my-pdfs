@@ -1,0 +1,5 @@
+*.pdf
+chunks.json
+.env
+__pycache__/
+.venv/
