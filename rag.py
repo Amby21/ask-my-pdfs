@@ -54,7 +54,7 @@ def top_chunks(question, k=5):
         return top_chunks_local(question,k)
     return top_chunks_azure(question, k, hybrid=(SEARCH_MODE == "hybrid"))
 
-def ask(question,k=5):
+def ask(question,k=5,model=CHAT_MODEL):
 
     t0 = time.perf_counter() # Intitiating time
 
@@ -71,7 +71,7 @@ def ask(question,k=5):
     system = "You are an assistant, answer ONLY from the context provided, cite pages like (p. 6), If the context does not contain the answer, reply with exactly the single word NOT_FOUND and nothing else. Do not explain."
 
     resp=client.chat.completions.create(
-        model=CHAT_MODEL,
+        model=model,
         messages = [{"role":"system",
                         "content": system},
                         {"role":"user",
@@ -82,6 +82,8 @@ def ask(question,k=5):
     usage = resp.usage
     return {
     "reply": resp.choices[0].message.content,
+    "model": model,
+    "served_model": resp.model,
     "pages": sorted({chunk["page"] for score, chunk in results}),
     "prompt_tokens": usage.prompt_tokens,
     "completion_tokens": usage.completion_tokens,

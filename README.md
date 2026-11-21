@@ -128,3 +128,40 @@ The citation check proves the cited pages were retrieved. It does not prove that
 Index pages and very short chunks are indexed, and they take result slots.
 pypdf flattens tables. Document Intelligence's layout model would read them better.
 One document, one search per question. It is a retrieval workflow, not an agent: code decides each step, and there is no tool loop or memory.
+
+## Model comparison (`compare.py`)
+
+Runs the same exam against any model deployed on the Azure resource, and
+reports quality, speed and cost per question.
+
+    python compare.py gpt-5-mini
+    python compare.py gpt-6-luna
+
+**The exam:** 10 golden questions (5 answerable, 5 not in the guide).
+Each answerable question is checked three ways: correct refusal behaviour,
+required words from the manual present in the answer (`MUST` in
+`golden_question.py`), and cited pages all among the retrieved pages.
+
+**Guard:** each run stops with an error if the model that answered
+(`served_model`, reported by the API) does not match the model requested.
+
+**Results (one run each, Nov 2026, Global Standard pricing from the Foundry model cards):**
+
+| | gpt-5-mini | gpt-6-luna |
+|---|---|---|
+| Refusals / content / citations | 10/10, 5/5, 5/5 | 10/10, 5/5, 5/5 |
+| Avg tokens in / out | 1,089 / 280 | 1,089 / 46 |
+| Avg model seconds | 3.2 | 1.5 |
+| Cost per 1,000 questions | about $0.83 | about $0.13 |
+
+**What this shows:** on this exam, the cheaper model scored the same, ran
+about 2x faster and cost about 6x less.
+
+**What it does not show:** that the two are equal in general. The exam is
+small and easy (both score perfectly), each figure is a single run
+(output tokens varied by about 28% between runs for luna), and prices
+change. A harder exam (near-miss refusals, paraphrased questions) is the
+next step.
+
+**Adding a model:** deploy it in Foundry with a deployment name equal to
+the model name, then add its price to `PRICES` in `compare.py`.
